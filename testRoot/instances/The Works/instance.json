@@ -1,0 +1,19 @@
+{
+    "info" : {
+        "name" : "The Works (load EVERYTHING installed)",
+        "windowTitle" : "Starbound - The Works"
+    },
+    
+    "assetSources" : [
+        {
+            "type" : "workshop",
+            "blacklist" : [
+                //"729480149", // Frackin Universe
+                
+                "dummy"
+            ]
+        },
+        "sb:/mods/",
+        "sb:/mods/_projects/StardustSuite/"
+    ]
+}
