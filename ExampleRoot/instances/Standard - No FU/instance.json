@@ -1,0 +1,23 @@
+{
+    "info" : {
+        "name" : "> Standard: No Frackin' Universe",
+        "windowTitle" : "Starbound - (Mostly) Normal"
+    },
+    
+    "savePath" : "sb:/storage/",
+    
+    "assetSources" : [
+        {
+            "type" : "workshop",
+            "blacklist" : [
+                "729480149", // Frackin' Universe
+                "729492703", // Frackin' Music
+                "729492334", // Frackin' Races
+                "738457667", // Frackin' Races Foods
+                
+                "dummy"
+            ]
+        },
+        "sb:/mods/"
+    ]
+}
