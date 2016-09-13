@@ -188,5 +188,8 @@ GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
 
+# shortcuts
+*.lnk
+
 # project-specific clutter
 testRoot/*
