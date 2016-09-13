@@ -36,7 +36,7 @@ namespace MultiBound {
             instList.Model = instListStore;
 
             var col = new TreeViewColumn();
-            col.Title = "Instance";
+            col.Title = "Profile";
 
             CellRendererText cr = new CellRendererText();
             col.PackStart(cr, true);
