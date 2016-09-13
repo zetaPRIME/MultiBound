@@ -23,8 +23,6 @@ namespace MultiBound {
         TreeView instList;
         ListStore instListStore;
 
-        Instance selectedInstance;
-
         public MainWindow() : base("MultiBound") {
 
             Title = "MultiBound (ALPHA)";
