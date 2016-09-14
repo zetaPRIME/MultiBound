@@ -73,6 +73,8 @@ namespace MultiBound {
             assetDirs.SetJsonType(JsonType.Array);
             assetDirs.Add("..\\assets\\");
 
+            Path workshopRoot = Config.StarboundRootPath.Combine("../../workshop/content/211820/");
+
             if (data.Has("assetSources")) {
                 JsonData assetSources = data["assetSources"];
                 foreach (JsonData src in assetSources) {
@@ -86,14 +88,16 @@ namespace MultiBound {
 
                     switch (type) {
                         case "mod": {
-                            // TODO: IMPLEMENT THIS
+                            // TODO: IMPLEMENT THIS MORE
+                            if (src.Has("workshopId")) {
+                                assetDirs.Add(workshopRoot.Combine((string)src["workshopId"]));
+                            }
                         } break;
 
                         case "workshop": {
                             Dictionary<string, bool> blacklist = new Dictionary<string, bool>();
                             if (src.Has("blacklist")) foreach (JsonData entry in src["blacklist"]) blacklist[(string)entry] = true;
 
-                            Path workshopRoot = Config.StarboundRootPath.Combine("../../workshop/content/211820/");
                             foreach (var p in workshopRoot.Directories()) {
                                 if (p.FileName.StartsWith("_")) continue; // ignore _whatever
                                 if (blacklist.ContainsKey(p.FileName)) continue; // ignore blacklisted items
