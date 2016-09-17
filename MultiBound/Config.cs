@@ -22,7 +22,7 @@ namespace MultiBound {
 
             StarboundPath = root.Combine((string)cfgJson["starboundPath"]); // actually the Starbound *executable* path in most instances!
             StarboundRootPath = StarboundPath;
-            while (StarboundRootPath.FileName.ToLower() != "starbound") StarboundRootPath = StarboundRootPath.Up();
+            while (StarboundRootPath.FileName.ToLower() != "starbound" || !StarboundRootPath.IsDirectory) StarboundRootPath = StarboundRootPath.Up();
 
             InstanceRoot = root.Combine("instances");
             if (cfgJson.Has("instanceRoot")) InstanceRoot = root.Combine((string)cfgJson["instanceRoot"]);
