@@ -9,6 +9,8 @@ using LitJson;
 
 namespace MultiBound {
     public class MainWindow : Window {
+        const string VERSION_LABEL = "alpha v0.01";
+
         static void Main(string[] args) {
             Application.Init ();
 
@@ -25,7 +27,7 @@ namespace MultiBound {
 
         public MainWindow() : base("MultiBound") {
 
-            Title = "MultiBound (ALPHA)";
+            Title = "MultiBound (" + VERSION_LABEL + ")";
             
             var vert = new VBox();
             Add(vert);

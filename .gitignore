@@ -192,4 +192,4 @@ ModelManifest.xml
 *.lnk
 
 # project-specific clutter
-testRoot/*
+release/*

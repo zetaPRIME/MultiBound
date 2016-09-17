@@ -140,6 +140,7 @@ namespace MultiBound {
 
             // cleanup
             path.Combine(".autopatch").Delete(true);
+            outCfg.Delete();
         }
     }
 }
