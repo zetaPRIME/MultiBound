@@ -19,6 +19,7 @@
                 "dummy"
             ]
         },
-        "sb:/mods/"
+        "sb:/mods/",
+        "inst:/mods/"
     ]
 }

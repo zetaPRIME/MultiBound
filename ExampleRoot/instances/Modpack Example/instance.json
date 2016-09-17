@@ -1,0 +1,29 @@
+{
+    "info" : {
+        "name" : "Modpack Example",
+        "windowTitle" : "Starbound - MultiBound Modpack Example"
+    },
+    
+    "savePath" : "inst:/storage/",
+    
+    "assetSources" : [
+        // Just two specific mods from the Workshop
+        {
+            "type" : "mod",
+            "name" : "Frackin' Universe",
+            "workshopId" : "729480149"
+        },
+        {
+            // "type" : "mod", // optional, as it defaults to "mod"!
+            "name" : "Frackin' Races",
+            "workshopId" : "763259329"
+        },
+        
+        // instance's mod folder; just-a-string for a raw path
+        "inst:/mods/"
+        // two prefixes available
+        // "sb:" for a path relative to your starbound root folder
+        // "inst:" for a path relative to the instance's own folder (which this file is in)
+        // no prefix is relative to the starbound executable, like in sbinit.config
+    ]
+}
