@@ -71,7 +71,7 @@ namespace MultiBound {
             JsonData assetDirs = initCfg["assetDirectories"] = new JsonData();
 
             assetDirs.SetJsonType(JsonType.Array);
-            assetDirs.Add("..\\assets\\");
+            assetDirs.Add("../assets/");
 
             Path workshopRoot = Config.StarboundRootPath.Combine("../../workshop/content/211820/");
 
