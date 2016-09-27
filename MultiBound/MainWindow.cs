@@ -28,6 +28,8 @@ namespace MultiBound {
         public MainWindow() : base("MultiBound") {
 
             Title = "MultiBound (" + VERSION_LABEL + ")";
+            //string[] asdf = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceNames();
+            this.Icon = new Gdk.Pixbuf(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("MultiBound.MultiBound-icon.ico"));
             
             var vert = new VBox();
             Add(vert);

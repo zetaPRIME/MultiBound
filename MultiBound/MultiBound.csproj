@@ -35,6 +35,9 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>MultiBound-icon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
@@ -91,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="FluentPath\license.txt" />
+    <EmbeddedResource Include="MultiBound-icon.ico" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="asdf\" />
