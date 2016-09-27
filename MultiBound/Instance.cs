@@ -94,6 +94,10 @@ namespace MultiBound {
                             }
                         } break;
 
+                        case "workshopAuto": {
+                            if (src.Has("id")) assetDirs.Add(workshopRoot.Combine((string)src["id"]).FullPath);
+                        } break;
+
                         case "workshop": {
                             Dictionary<string, bool> blacklist = new Dictionary<string, bool>();
                             if (src.Has("blacklist")) foreach (JsonData entry in src["blacklist"]) blacklist[(string)entry] = true;
