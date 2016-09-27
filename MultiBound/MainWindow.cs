@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Media;
 using Gtk;
 
 using Fluent.IO;
@@ -9,7 +10,7 @@ using LitJson;
 
 namespace MultiBound {
     public class MainWindow : Window {
-        const string VERSION_LABEL = "alpha v0.01";
+        const string VERSION_LABEL = "alpha v0.02";
 
         static void Main(string[] args) {
             Application.Init ();
@@ -103,12 +104,18 @@ namespace MultiBound {
             md.Run();
             md.Destroy();*/
 
+            if (!btnWorkshopRefresh.Sensitive) SystemSounds.Hand.Play(); // signal disabled
             // example http://steamcommunity.com/sharedfiles/filedetails/?id=738053345
-            if (text.Contains("steamcommunity.com/sharedfiles/filedetails/?id=")) {
+            else if (text.Contains("steamcommunity.com/sharedfiles/filedetails/?id=")) {
+                text = "http://" + text.Substring(text.LastIndexOf("steamcommunity.com")); // conform to being link
                 Window.Cursor = new Gdk.Cursor(Gdk.CursorType.Watch);
+                btnWorkshopRefresh.Sensitive = false; // disable button
+                
                 Instance.FromCollection(text, (sender, e) => {
                     // success
+                    
                     Window.Cursor = new Gdk.Cursor(Gdk.CursorType.Arrow);
+                    btnWorkshopRefresh.Sensitive = true;
                     var ire = (InstanceRefreshEventArgs)e;
 
                     instListStore.Clear();
@@ -120,7 +127,12 @@ namespace MultiBound {
                 }, (sender, e) => {
                     // fail
                     Window.Cursor = new Gdk.Cursor(Gdk.CursorType.Arrow);
+                    btnWorkshopRefresh.Sensitive = true;
+                    SystemSounds.Asterisk.Play(); // signal failure
                 });
+            }
+            else {
+                SystemSounds.Asterisk.Play(); // signal invalid link
             }
         }
 
@@ -149,9 +161,11 @@ namespace MultiBound {
             Instance selInst = (instListStore.GetValue(selIter, 0) as Instance);
 
             Window.Cursor = new Gdk.Cursor(Gdk.CursorType.Watch);
+            btnWorkshopRefresh.Sensitive = false; // disable button
             Instance.FromCollection("", (sender, e) => {
                 // success
                 Window.Cursor = new Gdk.Cursor(Gdk.CursorType.Arrow);
+                btnWorkshopRefresh.Sensitive = true;
                 var ire = (InstanceRefreshEventArgs)e;
 
                 instListStore.Clear();
@@ -163,6 +177,8 @@ namespace MultiBound {
             }, (sender, e) => {
                 // fail
                 Window.Cursor = new Gdk.Cursor(Gdk.CursorType.Arrow);
+                btnWorkshopRefresh.Sensitive = true;
+                SystemSounds.Asterisk.Play(); // signal failure
             }, selInst);
         }
 
