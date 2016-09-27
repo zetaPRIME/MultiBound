@@ -25,6 +25,8 @@ namespace MultiBound {
         TreeView instList;
         ListStore instListStore;
 
+        Button btnWorkshopRefresh;
+
         public MainWindow() : base("MultiBound") {
 
             Title = "MultiBound (" + VERSION_LABEL + ")";
@@ -59,24 +61,78 @@ namespace MultiBound {
             instList.ButtonPressEvent += (obj, args) => {
                 if (args.Event.Type == Gdk.EventType.TwoButtonPress) LaunchSelected();
             };
+
+            var bottomBar = new HBox();
+            vert.PackEnd(bottomBar, false, false, 0);
             
             Button btn = new Button();
             btn.Label = "Launch!";
-            vert.PackEnd(btn, false, false, 0);
+            bottomBar.PackStart(btn, true, true, 0);
+
+            btnWorkshopRefresh = new Button();
+            btnWorkshopRefresh.Label = "Refresh";
+            bottomBar.PackEnd(btnWorkshopRefresh, false, false, 0);
+            
+
             foreach (Instance inst in Instance.list) {
                 instListStore.AppendValues(inst);
             }
+
             
             //btn.SetSizeRequest(100, 32);
 
             btn.Clicked += (sender, e) => LaunchSelected();
+            btnWorkshopRefresh.Clicked += (sender, e) => RefreshCollection();
+
+            this.KeyPressEvent += OnKeyPress;
 
             this.SetDefaultSize(400, 300);
             ShowAll();
+            UpdateButtonBar();
+        }
+
+        void OnKeyPress(object sender, KeyPressEventArgs e) {
+            if (e.Event.Key == Gdk.Key.v && e.Event.State == Gdk.ModifierType.ControlMask) {
+                // ctrl+v
+                this.GetClipboard(Gdk.Selection.Clipboard).RequestText(OnPaste);
+            }
+        }
+
+        void OnPaste(Clipboard clipboard, string text) {
+            /*MessageDialog md = new MessageDialog(this, DialogFlags.DestroyWithParent, MessageType.Question, ButtonsType.YesNo, "Paste?");
+            md.Run();
+            md.Destroy();*/
+
+            // example http://steamcommunity.com/sharedfiles/filedetails/?id=738053345
+            if (text.Contains("steamcommunity.com/sharedfiles/filedetails/?id=")) {
+                Window.Cursor = new Gdk.Cursor(Gdk.CursorType.Watch);
+                Instance.FromCollection(text, (sender, e) => {
+                    // success
+                    Window.Cursor = new Gdk.Cursor(Gdk.CursorType.Arrow);
+                    var ire = (InstanceRefreshEventArgs)e;
+
+                    instListStore.Clear();
+                    foreach (Instance inst in Instance.list) {
+                        var iter = instListStore.AppendValues(inst);
+                        if (inst == ire.selectInst) instList.Selection.SelectIter(iter);
+                    }
+                    UpdateButtonBar();
+                }, (sender, e) => {
+                    // fail
+                    Window.Cursor = new Gdk.Cursor(Gdk.CursorType.Arrow);
+                });
+            }
         }
 
         void instList_CursorChanged(object sender, EventArgs e) {
-            //
+            UpdateButtonBar();
+        }
+
+        void UpdateButtonBar() {
+            TreeIter iter;
+            instList.Selection.GetSelected(out iter);
+            Instance inst = (instListStore.GetValue(iter, 0) as Instance);
+            btnWorkshopRefresh.Visible = inst != null && inst.IsWorkshop;
         }
 
         void LaunchSelected() {
@@ -85,6 +141,29 @@ namespace MultiBound {
             Hide();
             (instListStore.GetValue(iter, 0) as Instance).Launch();
             Show();
+        }
+
+        void RefreshCollection() {
+            TreeIter selIter;
+            instList.Selection.GetSelected(out selIter);
+            Instance selInst = (instListStore.GetValue(selIter, 0) as Instance);
+
+            Window.Cursor = new Gdk.Cursor(Gdk.CursorType.Watch);
+            Instance.FromCollection("", (sender, e) => {
+                // success
+                Window.Cursor = new Gdk.Cursor(Gdk.CursorType.Arrow);
+                var ire = (InstanceRefreshEventArgs)e;
+
+                instListStore.Clear();
+                foreach (Instance inst in Instance.list) {
+                    var iter = instListStore.AppendValues(inst);
+                    if (inst == ire.selectInst) instList.Selection.SelectIter(iter);
+                }
+                UpdateButtonBar();
+            }, (sender, e) => {
+                // fail
+                Window.Cursor = new Gdk.Cursor(Gdk.CursorType.Arrow);
+            }, selInst);
         }
 
         void LaunchOld() {

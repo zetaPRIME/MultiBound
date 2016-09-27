@@ -5,10 +5,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using System.Net;
+using System.Net.Http;
+
 using Fluent.IO;
 using LitJson;
+using AngleSharp;
+using AngleSharp.Dom;
+using AngleSharp.Parser.Html;
 
 namespace MultiBound {
+    public class InstanceRefreshEventArgs : EventArgs {
+        public Instance selectInst { get; set; }
+    }
+
     public class Instance {
         public static List<Instance> list = new List<Instance>();
         public static void RefreshList() {
@@ -31,6 +41,87 @@ namespace MultiBound {
             return inst;
         }
 
+        public static async void FromCollection(string url, EventHandler onComplete, EventHandler onFail, Instance updateTarget = null) {
+            string id = url.Substring(url.LastIndexOf("=") + 1);
+
+            JsonData instData;
+            Path instPath;
+            if (updateTarget != null) {
+                instPath = updateTarget.path.Combine("instance.json");
+                instData = JsonMapper.ToObject(instPath.Read());
+                if (url == "") {
+                    url = (string)instData["info"]["workshopLink"];
+                    id = url.Substring(url.LastIndexOf("=") + 1);
+                }
+            }
+            else {
+                instPath = Config.InstanceRoot.Combine("workshop_" + id, "instance.json");
+                if (instPath.Exists) instData = JsonMapper.ToObject(instPath.Read());
+                else {
+                    instData = JsonMapper.ToObject( // holy crepes this looks ugly
+@"{
+    ""info"" : { ""name"" : """", ""windowTitle"" : """" },
+    ""savePath"" : ""inst:/storage/"",
+    ""assetSources"" : [ ""inst:/mods"" ]
+}");
+                }
+            }
+
+            HtmlParser parser = new HtmlParser();
+            //IBrowsingContext bc = BrowsingContext.New(Configuration.Default);
+            //IDocument doc = bc.OpenAsync(url).Result;
+            HttpClient client = new HttpClient();
+            var request = await client.GetAsync(url);
+            var response = await request.Content.ReadAsStreamAsync();
+            var doc = parser.Parse(response);
+
+            string serial = doc.DocumentElement.OuterHtml;
+
+            //if (doc.All.Where(m => m.LocalName == "a" && m.Attributes["href"].Value == "http://steamcommunity.com/app/211820" && m.TextContent == "All").Count() == 0) return;
+            var tst = doc.QuerySelectorAll("a[href=\"http://steamcommunity.com/app/211820\"]");
+            if (doc.QuerySelectorAll("a[href=\"http://steamcommunity.com/app/211820\"]").Where(m => m.TextContent == "All").Count() == 0) { Gtk.Application.Invoke(onFail); return; } // make sure it's for Starbound
+            if (doc.QuerySelectorAll("a[onclick=\"SubscribeCollection();\"]").Count() == 0) { Gtk.Application.Invoke(onFail); return; } // and that it's a collection
+
+            JsonData autoMods = new JsonData();
+            foreach (var item in doc.QuerySelectorAll(".collectionItemDetails > a")) {
+                JsonData mod = new JsonData();
+                string link = item.Attributes["href"].Value;
+                mod["type"] = "workshopAuto";
+                mod["id"] = link.Substring(link.LastIndexOf("=") + 1);
+                mod["friendlyName"] = item.TextContent;
+                autoMods.Add(mod);
+            }
+
+            foreach (JsonData item in instData["assetSources"]) {
+                if (item.IsObject && (string)item["type"] == "workshopAuto") continue;
+                autoMods.Add(item);
+            }
+
+            instData["assetSources"] = autoMods;
+
+            string colName = doc.QuerySelector(".workshopItemDetailsHeader > .workshopItemTitle").TextContent;
+            instData["info"]["workshopLink"] = url;
+            if (!(instData["info"].Has("lockInfo") && (!instData["info"]["lockInfo"].IsBoolean || (bool)instData["info"]["lockInfo"]))) {
+                instData["info"]["name"] = colName;
+                instData["info"]["windowTitle"] = "Starbound - " + colName;
+            }
+
+            instPath.Write(JsonMapper.ToPrettyJson(instData));
+
+            Instance.RefreshList();
+
+            InstanceRefreshEventArgs e = new InstanceRefreshEventArgs();
+            string fpath = instPath.Up().FullPath;
+            foreach (Instance iInst in list) {
+                if (iInst.path.FullPath == fpath) {
+                    e.selectInst = iInst;
+                    break;
+                }
+            }
+            
+            Gtk.Application.Invoke(null, e, onComplete);
+        }
+
         private Instance() { }
 
         public Path path;
@@ -41,6 +132,11 @@ namespace MultiBound {
             get {
                 if (info.Has("windowTitle")) return (string)info["windowTitle"];
                 return Name;
+            }
+        }
+        public bool IsWorkshop {
+            get {
+                return info.Has("workshopLink");
             }
         }
 
