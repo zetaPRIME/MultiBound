@@ -90,7 +90,7 @@ namespace MultiBound {
                         case "mod": {
                             // TODO: IMPLEMENT THIS MORE
                             if (src.Has("workshopId")) {
-                                assetDirs.Add(workshopRoot.Combine((string)src["workshopId"]));
+                                assetDirs.Add(workshopRoot.Combine((string)src["workshopId"]).FullPath);
                             }
                         } break;
 
