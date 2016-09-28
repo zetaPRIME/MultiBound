@@ -12,6 +12,7 @@ using Fluent.IO;
 using LitJson;
 using AngleSharp;
 using AngleSharp.Dom;
+using AngleSharp.Dom.Html;
 using AngleSharp.Parser.Html;
 
 namespace MultiBound {
@@ -120,6 +121,47 @@ namespace MultiBound {
             }
             
             Gtk.Application.Invoke(null, e, onComplete);
+        }
+
+        static async Task<IHtmlDocument> IterateCollection(string url, JsonData autoMods, Dictionary<String, bool> tracking) {
+            string id = url.Substring(url.LastIndexOf("=") + 1);
+            if (tracking.ContainsKey(id)) return null; // already iterated this collection(!?)
+
+            HtmlParser parser = new HtmlParser();
+            HttpClient client = new HttpClient();
+            var request = await client.GetAsync(url);
+            var response = await request.Content.ReadAsStreamAsync();
+            var doc = parser.Parse(response);
+
+            // dispose of anything we no longer need
+            parser = null;
+            client.Dispose(); client = null;
+            request.Dispose(); request = null;
+            response.Dispose(); response = null;
+
+            if (doc.QuerySelectorAll("a[href=\"http://steamcommunity.com/app/211820\"]").Where(m => m.TextContent == "All").Count() == 0) return null; // make sure it's for Starbound
+            if (doc.QuerySelectorAll("a[onclick=\"SubscribeCollection();\"]").Count() == 0) return null; // and that it's a collection
+
+            foreach (var item in doc.QuerySelectorAll(".collectionItemDetails > a")) { // iterate mods
+                string link = item.Attributes["href"].Value;
+                string modid = link.Substring(link.LastIndexOf("=") + 1);
+                if (tracking.ContainsKey(modid)) continue;
+                tracking[modid] = true;
+                JsonData mod = new JsonData();
+                mod["type"] = "workshopAuto";
+                mod["id"] = modid;
+                mod["friendlyName"] = item.TextContent;
+                autoMods.Add(mod);
+            }
+
+            tracking[id] = true; // do this here so that if there's a circular reference somehow it doesn't herpderp everything
+
+            foreach (var sitem in doc.QuerySelectorAll(".collectionChildren a > .workshopItemTitle")) { // iterate linked collections
+                var item = sitem.ParentElement;
+                await IterateCollection(item.Attributes["href"].Value, autoMods, tracking);
+            }
+
+            return doc;
         }
 
         private Instance() { }
