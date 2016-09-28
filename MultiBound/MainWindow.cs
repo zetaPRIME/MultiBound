@@ -203,46 +203,6 @@ namespace MultiBound {
             }, selInst);
         }
 
-        void LaunchOld() {
-            JsonData jBuild = new JsonData();
-            jBuild.SetJsonType(JsonType.Object);
-            jBuild["storageDirectory"] = "..\\storage\\";
-            var dconf = jBuild["defaultConfiguration"] = new JsonData();
-            dconf.SetJsonType(JsonType.Object);
-            dconf["gameServerBind"] = dconf["queryServerBind"] = dconf["rconServerBind"] = "*";
-
-            List<string> dirs = new List<string>();
-            dirs.Add("../assets/");
-
-            JsonData assetDirs = jBuild["assetDirectories"] = new JsonData();
-            assetDirs.SetJsonType(JsonType.Array);
-            assetDirs.Add("..\\assets\\");
-
-            Path wsp = Config.StarboundRootPath.Combine("../../workshop/content/211820/");
-            foreach (var p in wsp.Directories()) {
-                if (p.FileName.StartsWith("_")) continue; // ignore _whatever
-                assetDirs.Add(p.FullPath);
-            }
-            
-
-            string sj = JsonMapper.ToPrettyJson(jBuild);
-
-            Path cfg = Config.StarboundPath.Up().Combine("mbinit.config");
-            cfg.Write(sj);
-
-            this.Hide();
-
-            Process sb = new Process();
-            sb.StartInfo.WorkingDirectory = Config.StarboundPath.Up().FullPath;
-            sb.StartInfo.FileName = Config.StarboundPath.FullPath;
-            //sb.StartInfo.Arguments = "-bootconfig \"" + cfg.FullPath + "\"";
-            sb.StartInfo.Arguments = "-bootconfig mbinit.config";
-            sb.Start();
-            sb.WaitForExit();
-
-            this.Show();
-        }
-
         protected override void OnDestroyed() {
             Application.Quit();
         }
