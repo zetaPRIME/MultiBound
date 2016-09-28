@@ -97,6 +97,28 @@ namespace MultiBound {
                 // ctrl+v
                 this.GetClipboard(Gdk.Selection.Clipboard).RequestText(OnPaste);
             }
+            else if (e.Event.Key == Gdk.Key.r && e.Event.State == Gdk.ModifierType.ControlMask) {
+                // ctrl+r, refresh list
+                TreeIter selIter;
+                instList.Selection.GetSelected(out selIter);
+                string selPath = (instListStore.GetValue(selIter, 0) as Instance).path.FullPath;
+
+                Instance.RefreshList();
+
+                instListStore.Clear();
+                foreach (Instance inst in Instance.list) {
+                    var iter = instListStore.AppendValues(inst);
+                    if (inst.path.FullPath == selPath) instList.Selection.SelectIter(iter);
+                }
+                if (instList.Selection.CountSelectedRows() == 0) { // empty selection, just select the first thing
+                    TreeIter iter;
+                    instListStore.GetIterFirst(out iter);
+                    instList.Selection.SelectIter(iter);
+                }
+                UpdateButtonBar();
+
+                SystemSounds.Asterisk.Play(); // signal that it at least did something
+            }
         }
 
         void OnPaste(Clipboard clipboard, string text) {
@@ -113,7 +135,6 @@ namespace MultiBound {
                 
                 Instance.FromCollection(text, (sender, e) => {
                     // success
-                    
                     Window.Cursor = new Gdk.Cursor(Gdk.CursorType.Arrow);
                     btnWorkshopRefresh.Sensitive = true;
                     var ire = (InstanceRefreshEventArgs)e;

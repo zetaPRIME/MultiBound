@@ -68,30 +68,10 @@ namespace MultiBound {
                 }
             }
 
-            HtmlParser parser = new HtmlParser();
-            //IBrowsingContext bc = BrowsingContext.New(Configuration.Default);
-            //IDocument doc = bc.OpenAsync(url).Result;
-            HttpClient client = new HttpClient();
-            var request = await client.GetAsync(url);
-            var response = await request.Content.ReadAsStreamAsync();
-            var doc = parser.Parse(response);
-
-            string serial = doc.DocumentElement.OuterHtml;
-
-            //if (doc.All.Where(m => m.LocalName == "a" && m.Attributes["href"].Value == "http://steamcommunity.com/app/211820" && m.TextContent == "All").Count() == 0) return;
-            var tst = doc.QuerySelectorAll("a[href=\"http://steamcommunity.com/app/211820\"]");
-            if (doc.QuerySelectorAll("a[href=\"http://steamcommunity.com/app/211820\"]").Where(m => m.TextContent == "All").Count() == 0) { Gtk.Application.Invoke(onFail); return; } // make sure it's for Starbound
-            if (doc.QuerySelectorAll("a[onclick=\"SubscribeCollection();\"]").Count() == 0) { Gtk.Application.Invoke(onFail); return; } // and that it's a collection
-
             JsonData autoMods = new JsonData();
-            foreach (var item in doc.QuerySelectorAll(".collectionItemDetails > a")) {
-                JsonData mod = new JsonData();
-                string link = item.Attributes["href"].Value;
-                mod["type"] = "workshopAuto";
-                mod["id"] = link.Substring(link.LastIndexOf("=") + 1);
-                mod["friendlyName"] = item.TextContent;
-                autoMods.Add(mod);
-            }
+            Dictionary<string, bool> tracking = new Dictionary<string, bool>();
+            var doc = await IterateCollection(url, autoMods, tracking);
+            if (doc == null) { Gtk.Application.Invoke(onFail); return; }
 
             foreach (JsonData item in instData["assetSources"]) {
                 if (item.IsObject && (string)item["type"] == "workshopAuto") continue;
