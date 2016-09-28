@@ -15,12 +15,23 @@ namespace MultiBound {
         static void Main(string[] args) {
             Application.Init ();
 
-            Config.Load();
-            Instance.RefreshList();
+            try {
+                Config.Load();
+                Instance.RefreshList();
 
-            new MainWindow ();
+                new MainWindow();
 
-            Application.Run();
+                Application.Run();
+            }
+            catch (Exception e) {
+                MessageDialog md = new MessageDialog(new Window(""), DialogFlags.DestroyWithParent, MessageType.Question, ButtonsType.Close,
+                    "Caught " + e.GetType().Name + ":\n\n"+e.Message
+                );
+                md.Icon = new Gdk.Pixbuf(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("MultiBound.MultiBound-icon.ico"));
+                md.Title = "MultiBound - Error Encountered";
+                md.Run();
+                md.Destroy();
+            }
         }
 
         TreeView instList;
