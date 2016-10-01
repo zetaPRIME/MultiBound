@@ -34,6 +34,7 @@ namespace MultiBound {
             }
         }
 
+        ScrolledWindow scrollField;
         TreeView instList;
         ListStore instListStore;
 
@@ -66,7 +67,9 @@ namespace MultiBound {
             });
 
             instList.AppendColumn(col);
-            vert.Add(instList);
+            scrollField = new ScrolledWindow();
+            scrollField.Add(instList);
+            vert.Add(scrollField);
 
             instList.HeadersVisible = false;
             instList.CursorChanged += instList_CursorChanged;
@@ -112,20 +115,18 @@ namespace MultiBound {
                 // ctrl+r, refresh list
                 TreeIter selIter;
                 instList.Selection.GetSelected(out selIter);
-                string selPath = (instListStore.GetValue(selIter, 0) as Instance).path.FullPath;
+                string selPath = (instListStore.GetValue(selIter, 0) as Instance).path.FileName;
 
                 Instance.RefreshList();
 
                 instListStore.Clear();
+                TreeIter nSelIter; instListStore.GetIterFirst(out nSelIter);
                 foreach (Instance inst in Instance.list) {
                     var iter = instListStore.AppendValues(inst);
-                    if (inst.path.FullPath == selPath) instList.Selection.SelectIter(iter);
+                    if (inst.path.FileName == selPath) nSelIter = iter;
                 }
-                if (instList.Selection.CountSelectedRows() == 0) { // empty selection, just select the first thing
-                    TreeIter iter;
-                    instListStore.GetIterFirst(out iter);
-                    instList.Selection.SelectIter(iter);
-                }
+                instList.Selection.SelectIter(nSelIter);
+                instList.ScrollToCell(instListStore.GetPath(nSelIter), instList.Columns[0], false, 0, 0);
                 UpdateButtonBar();
 
                 SystemSounds.Asterisk.Play(); // signal that it at least did something
@@ -151,10 +152,13 @@ namespace MultiBound {
                     var ire = (InstanceRefreshEventArgs)e;
 
                     instListStore.Clear();
+                    TreeIter nSelIter; instListStore.GetIterFirst(out nSelIter);
                     foreach (Instance inst in Instance.list) {
                         var iter = instListStore.AppendValues(inst);
-                        if (inst == ire.selectInst) instList.Selection.SelectIter(iter);
+                        if (inst == ire.selectInst) nSelIter = iter;
                     }
+                    instList.Selection.SelectIter(nSelIter);
+                    instList.ScrollToCell(instListStore.GetPath(nSelIter), instList.Columns[0], false, 0, 0);
                     UpdateButtonBar();
                 }, (sender, e) => {
                     // fail
@@ -201,10 +205,13 @@ namespace MultiBound {
                 var ire = (InstanceRefreshEventArgs)e;
 
                 instListStore.Clear();
+                TreeIter nSelIter; instListStore.GetIterFirst(out nSelIter);
                 foreach (Instance inst in Instance.list) {
                     var iter = instListStore.AppendValues(inst);
-                    if (inst == ire.selectInst) instList.Selection.SelectIter(iter);
+                    if (inst == ire.selectInst) nSelIter = iter;
                 }
+                instList.Selection.SelectIter(nSelIter);
+                instList.ScrollToCell(instListStore.GetPath(nSelIter), instList.Columns[0], false, 0, 0);
                 UpdateButtonBar();
             }, (sender, e) => {
                 // fail
