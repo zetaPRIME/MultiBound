@@ -193,11 +193,21 @@ namespace MultiBound {
 
             Path workshopRoot = Config.StarboundRootPath.Combine("../../workshop/content/211820/");
 
+            Dictionary<string, bool> workshop = new Dictionary<string, bool>();
+            List<string> paths = new List<string>();
+
+            Action<string> workshopAdd = (id) => {
+                if (!workshop.ContainsKey(id)) workshop[id] = true;
+            };
+            Action<string> workshopExclude = (id) => {
+                workshop[id] = false;
+            };
+
             if (data.Has("assetSources")) {
                 JsonData assetSources = data["assetSources"];
                 foreach (JsonData src in assetSources) {
                     if (src.IsString) {
-                        assetDirs.Add(EvalPath((string)src)); // TODO: process with sb:, inst: markers
+                        paths.Add(EvalPath((string)src)); // TODO: process with sb:, inst: markers
                         continue;
                     }
 
@@ -208,12 +218,16 @@ namespace MultiBound {
                         case "mod": {
                             // TODO: IMPLEMENT THIS MORE
                             if (src.Has("workshopId")) {
-                                assetDirs.Add(workshopRoot.Combine((string)src["workshopId"]).FullPath);
+                                workshopAdd((string)src["workshopId"]);
                             }
                         } break;
 
                         case "workshopAuto": {
-                            if (src.Has("id")) assetDirs.Add(workshopRoot.Combine((string)src["id"]).FullPath);
+                            if (src.Has("id")) workshopAdd((string)src["id"]);
+                        } break;
+
+                        case "workshopExclude": {
+                            if (src.Has("id")) workshopExclude((string)src["id"]);
                         } break;
 
                         case "workshop": {
@@ -223,7 +237,7 @@ namespace MultiBound {
                             foreach (var p in workshopRoot.Directories()) {
                                 if (p.FileName.StartsWith("_")) continue; // ignore _whatever
                                 if (blacklist.ContainsKey(p.FileName)) continue; // ignore blacklisted items
-                                assetDirs.Add(p.FullPath);
+                                workshopAdd(p.FileName);
                             }
                         } break;
 
@@ -231,6 +245,12 @@ namespace MultiBound {
                     }
                 }
             }
+            
+            // build asset list
+            foreach (KeyValuePair<string, bool> entry in workshop) {
+                if (entry.Value) assetDirs.Add(workshopRoot.Combine(entry.Key).FullPath);
+            }
+            foreach (string p in paths) assetDirs.Add(p);
 
             // and set window title
             {
