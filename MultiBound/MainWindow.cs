@@ -10,7 +10,7 @@ using LitJson;
 
 namespace MultiBound {
     public class MainWindow : Window {
-        const string VERSION_LABEL = "alpha v0.03";
+        const string VERSION_LABEL = "alpha v0.04";
 
         static void Main(string[] args) {
             Application.Init ();
