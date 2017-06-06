@@ -11,6 +11,7 @@ namespace MultiBound {
     public static class Config {
         public static Path StarboundPath;
         public static Path StarboundRootPath;
+        public static Path StarboundUnstablePath;
         public static Path InstanceRoot;
 
         public static JsonData SteamCmdInfo;
@@ -29,6 +30,8 @@ namespace MultiBound {
                 if (!StarboundRootPath.Exists) throw new ArgumentException("Starbound path not found! Check your multibound.config; are you sure starboundPath is set correctly?");
                 StarboundRootPath = StarboundRootPath.Up();
             }
+            StarboundUnstablePath = root.Combine((string)cfgJson["starboundUnstablePath"]); // same as StarboundPath but for the unstable channel
+            if (!StarboundUnstablePath.Exists) StarboundUnstablePath = StarboundPath;
 
             InstanceRoot = root.Combine("instances");
             if (cfgJson.Has("instanceRoot")) InstanceRoot = root.Combine((string)cfgJson["instanceRoot"]);

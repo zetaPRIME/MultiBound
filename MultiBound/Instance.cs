@@ -63,6 +63,7 @@ namespace MultiBound {
 @"{
     ""info"" : { ""name"" : """", ""windowTitle"" : """" },
     ""savePath"" : ""inst:/storage/"",
+    ""channel"" : ""stable"",
     ""assetSources"" : [ ""inst:/mods"" ]
 }");
                 }
@@ -73,6 +74,7 @@ namespace MultiBound {
             var doc = await IterateCollection(url, autoMods, tracking);
             if (doc == null) { Gtk.Application.Invoke(onFail); return; }
 
+            // preserve all previous manually-added items
             foreach (JsonData item in instData["assetSources"]) {
                 if (item.IsObject && (string)item["type"] == "workshopAuto") continue;
                 autoMods.Add(item);
@@ -270,12 +272,18 @@ namespace MultiBound {
             if (data.Has("savePath")) storageDir = (string)(data["savePath"]);
             initCfg["storageDirectory"] = EvalPath(storageDir);
 
-            Path outCfg = Config.StarboundPath.Up().Combine("mbinit.config");
+            // determine which path to use
+            Path sbpath = Config.StarboundPath; // default to stable channel
+            if (data.Has("channel") && data["channel"].IsString && (string)data["channel"] == "unstable") {
+                sbpath = Config.StarboundUnstablePath; // but have support for unstable too
+            }
+
+            Path outCfg = sbpath.Up().Combine("mbinit.config");
             outCfg.Write(JsonMapper.ToPrettyJson(initCfg));
 
             Process sb = new Process();
-            sb.StartInfo.WorkingDirectory = Config.StarboundPath.Up().FullPath;
-            sb.StartInfo.FileName = Config.StarboundPath.FullPath;
+            sb.StartInfo.WorkingDirectory = sbpath.Up().FullPath;
+            sb.StartInfo.FileName = sbpath.FullPath;
             sb.StartInfo.Arguments = "-bootconfig mbinit.config";
             sb.Start();
             sb.WaitForExit();
