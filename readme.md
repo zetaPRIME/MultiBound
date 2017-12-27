@@ -7,7 +7,7 @@ Just extract the zip in its own folder somewhere, edit `multibound.config` with 
 
 ### Linux
 **( tested on Manjaro; your package names may be different! )**
-- Make sure you have `gtk-sharp-3` installed in your package manager
+- Make sure you have `mono` and `gtk-sharp-3` installed in your package manager
 - Extract the zip in its own folder somewhere
 - Edit `multibound.config`, pointing `starboundPath` to your `run-client.sh`
 - - (for example, mine is at `/home/zetaprime/.steam/steam/steamapps/common/Starbound/linux/run-client.sh`)
