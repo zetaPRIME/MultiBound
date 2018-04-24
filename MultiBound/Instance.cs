@@ -121,7 +121,7 @@ namespace MultiBound {
             request.Dispose(); request = null;
             response.Dispose(); response = null;
 
-            if (doc.QuerySelectorAll("a[href=\"http://steamcommunity.com/app/211820\"]").Where(m => m.TextContent == "All").Count() == 0) return null; // make sure it's for Starbound
+            if (doc.QuerySelectorAll("a[href=\"https://steamcommunity.com/app/211820\"]").Where(m => m.TextContent == "All").Count() == 0) return null; // make sure it's for Starbound
             if (doc.QuerySelectorAll("a[onclick=\"SubscribeCollection();\"]").Count() == 0) return null; // and that it's a collection
 
             foreach (var item in doc.QuerySelectorAll(".collectionItemDetails > a")) { // iterate mods
