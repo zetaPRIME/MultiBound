@@ -1,4 +1,4 @@
-### [**DISCONTINUED - MultiBound 2 is in development**](https://github/zetaPRIME/MultiBound2)
+### [**DISCONTINUED - MultiBound 2 is in development**](https://github.com/zetaPRIME/MultiBound2)
 This is a full rewrite; Windows builds coming soon (I have no Windows machine to build them myself)
 
 ---
