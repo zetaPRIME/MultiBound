@@ -1,5 +1,5 @@
-### [**DISCONTINUED - MultiBound 2 is in development**](https://github.com/zetaPRIME/MultiBound2)
-This is a full rewrite; Windows builds coming soon (I have no Windows machine to build them myself)
+### [**DEPRECATED - MultiBound 2 has been released**](https://github.com/zetaPRIME/MultiBound2)
+MultiBound 2 is a full rewrite, replacing the crust of GTK# with Qt5 (with probably a lower memory footprint), and can also install/update Steam Workshop mods for you without having to launch Steam (or indeed even have the Steam version).
 
 ---
 # MultiBound - Starbound Profile Launcher
